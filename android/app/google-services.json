@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "199259010710",
+    "project_id": "meu-financeiro-859d3",
+    "storage_bucket": "meu-financeiro-859d3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:199259010710:android:61785d80c15aed413df4b7",
+        "android_client_info": {
+          "package_name": "com.exemple.meu_financeiro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "199259010710-39c9b0onsi5d6h429lgipi7ees2n19kb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzsxMNtm_BEe5paTy_KiCL13wAcIQ29J4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "199259010710-39c9b0onsi5d6h429lgipi7ees2n19kb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
