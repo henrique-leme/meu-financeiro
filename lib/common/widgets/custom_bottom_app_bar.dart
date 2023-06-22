@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
@@ -20,6 +22,18 @@ class CustomBottomAppBar extends StatefulWidget {
 }
 
 class _CustomBottomAppBarState extends State<CustomBottomAppBar> {
+  @override
+  void initState() {
+    widget.controller.addListener(() {
+      setState(() {
+        log(
+          widget.controller.selectedBottomAppBarItemIndex.toString(),
+        );
+      });
+    });
+    super.initState();
+  }
+
   @override
   void dispose() {
     widget.controller.dispose();

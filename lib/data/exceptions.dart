@@ -13,7 +13,7 @@ class GeneralException extends Failure {
   const GeneralException();
 
   @override
-  String get message => 'Ocorreu um erro. Tente novamente mais tarde';
+  String get message => 'An error has occurred. Please try again later.';
 }
 
 //API Exceptions
@@ -35,20 +35,20 @@ class APIException extends Failure {
         case 'validation-failed':
           return 'Bad request. Check you request and try again.';
         default:
-          return 'Ocorreu um erro intero. Tente novamente mais tarde.';
+          return 'An internal error ocurred. Please try again later.';
       }
     }
     switch (code) {
       case 400:
-        return 'Requisição inválida. Verifique sua solicitação e tente novamente.';
+        return 'Bad request. Check you request and try again.';
       case 401:
-        return 'Usuário não autorizado a acessar este recurso no momento. Por favor, faça a autenticação novamente.';
+        return 'User not authorized to access this resource at this time. Please reauthenticate';
       case 404:
-        return 'Não foi possível concluir esta operação. Por favor, tente novamente mais tarde.';
+        return 'It was not possible to finish this operation. Please try again later';
       case 503:
-        return 'Serviço indisponível no momento. Por favor, tente novamente mais tarde.';
+        return 'Service unavailable at this time. Please try again later.';
       default:
-        return 'Ocorreu um erro interno. Por favor, tente novamente mais tarde.';
+        return 'An internal error ocurred. Please try again later.';
     }
   }
 }
@@ -68,18 +68,18 @@ class AuthException extends Failure {
       case 'invalid-jwt':
       case 'invalid-headers':
       case 'user-not-authenticated':
-        return 'Sessão expirada. Logue novamente.';
+        return 'Your session has expired. Please loggin again.';
       case 'email-already-exists':
-        return 'O e-mail fornecido já está em uso. Por favor, verifique suas informações ou crie uma nova conta.';
+        return 'The provided email is already in use. Please check your information or create a new account.';
       case 'user-not-found':
       case 'wrong-password':
-        return 'Email ou senha incorretos. Confira suas informações ou crie uma nova conta.';
+        return 'Email or password are incorrect. Please check your information or create a new account.';
       case 'network-request-failed':
-        return 'Não foi possível se conectar ao sistema. Verifique sua conexão e tente novamente.';
+        return 'It was not possible to connect to the remote server. Please check you connection and try again.';
       case 'too-many-requests':
-        return 'Devido a tentativas consecutivas falhadas, você não pode fazer login neste momento. Por favor, tente novamente em alguns instantes.';
+        return 'Due to consecutive failed attempts, you cannot login at this time. Please try again in a few moments.';
       case 'internal':
-        return 'Não foi possível criar a conta. Verifique as informações e tente novamente.';
+        return 'It was not possible to create your account at this time. Please check your information and try again.';
       default:
         return 'There was an error while authenticating. Please try again later.';
     }
@@ -112,9 +112,9 @@ class ConnectionException extends Failure {
   String get message {
     switch (code) {
       case 'connection-error':
-        return 'Não foi possível se conectar ao sistema. Verifique sua conexão e tente novamente.';
+        return 'It was not possible to connect to the remote server. Please check you connection and try again.';
       default:
-        return 'Ocorreu um erro interno. Por favor tente novamente.';
+        return 'An internal error ocurred. Please try again later.';
     }
   }
 }

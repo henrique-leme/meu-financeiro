@@ -1,10 +1,10 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-import '../common/data/exceptions.dart';
+import '../data/exceptions.dart';
+import 'api_service.dart';
 import 'auth_service.dart';
-import 'data_service.dart';
 
-class GraphQLService implements DataService<Map<String, dynamic>> {
+class GraphQLService implements ApiService<GraphQLClient, QueryResult> {
   GraphQLService({
     required this.authService,
   });
@@ -15,6 +15,8 @@ class GraphQLService implements DataService<Map<String, dynamic>> {
   GraphQLClient get client => _client;
 
   Future<GraphQLService> init() async {
+    await initHiveForFlutter();
+
     final HttpLink httpLink = HttpLink(
       'https://major-grub-66.hasura.app/v1/graphql',
     );
@@ -33,22 +35,20 @@ class GraphQLService implements DataService<Map<String, dynamic>> {
       link: link,
       defaultPolicies: DefaultPolicies(
         mutate: Policies(
-          fetch: FetchPolicy.noCache,
-          error: ErrorPolicy.ignore,
+          fetch: FetchPolicy.networkOnly,
         ),
         query: Policies(
-          fetch: FetchPolicy.noCache,
-          error: ErrorPolicy.ignore,
+          fetch: FetchPolicy.networkOnly,
         ),
       ),
-      cache: GraphQLCache(store: InMemoryStore()),
+      cache: GraphQLCache(store: HiveStore()),
     );
 
     return this;
   }
 
   @override
-  Future<Map<String, dynamic>> create({
+  Future<QueryResult> create({
     required String path,
     Map<String, dynamic> params = const {},
   }) async {
@@ -62,16 +62,14 @@ class GraphQLService implements DataService<Map<String, dynamic>> {
       if (result.hasException) {
         throw result.exception!;
       }
-      return result.data ?? {};
+      return result;
     } catch (e) {
-      _handleException(e);
-
-      return {};
+      rethrow;
     }
   }
 
   @override
-  Future<Map<String, dynamic>> read({
+  Future<QueryResult> read({
     required String path,
     Map<String, dynamic> params = const {},
   }) async {
@@ -81,22 +79,29 @@ class GraphQLService implements DataService<Map<String, dynamic>> {
         document: gql(path),
       );
 
+      final cacheResult = client.readQuery(options.asRequest);
       final result = await client.query(options);
 
       if (result.hasException && _containsInvalidResult(result)) {
         throw const AuthException(code: 'session-expired');
       }
 
-      return result.data ?? {};
+      if (result.data != null && !result.hasException) {
+        return result;
+      } else {
+        return QueryResult(
+          options: options,
+          source: QueryResultSource.cache,
+          data: cacheResult,
+        );
+      }
     } catch (e) {
-      _handleException(e);
-
-      return {};
+      rethrow;
     }
   }
 
   @override
-  Future<Map<String, dynamic>> update({
+  Future<QueryResult> update({
     required String path,
     Map<String, dynamic> params = const {},
   }) async {
@@ -112,16 +117,14 @@ class GraphQLService implements DataService<Map<String, dynamic>> {
         throw result.exception!;
       }
 
-      return result.data ?? {};
+      return result;
     } catch (e) {
-      _handleException(e);
-
-      return {};
+      rethrow;
     }
   }
 
   @override
-  Future<Map<String, dynamic>> delete({
+  Future<QueryResult> delete({
     required String path,
     Map<String, dynamic> params = const {},
   }) async {
@@ -137,11 +140,9 @@ class GraphQLService implements DataService<Map<String, dynamic>> {
         throw result.exception!;
       }
 
-      return result.data ?? {};
+      return result;
     } catch (e) {
-      _handleException(e);
-
-      return {};
+      rethrow;
     }
   }
 }
@@ -150,30 +151,11 @@ bool _containsInvalidResult(QueryResult result) {
   final List<GraphQLError> graphqlErrors = result.exception!.graphqlErrors;
 
   if (graphqlErrors.isNotEmpty) {
-    final Map<String, dynamic> errorExtensions =
-        graphqlErrors.first.extensions ?? {};
+    final Map<String, dynamic>? errorExtensions =
+        graphqlErrors.first.extensions;
 
-    return ['invalid-jwt', 'invalid-headers']
-        .any(errorExtensions.containsValue);
+    return errorExtensions != null &&
+        ['invalid-jwt', 'invalid-headers'].any(errorExtensions.containsValue);
   }
   return false;
-}
-
-void _handleException(dynamic e) {
-  if (e is OperationException && e.linkException != null) {
-    throw const ConnectionException(code: 'connection-error');
-  }
-
-  if (e is OperationException && e.graphqlErrors.isNotEmpty) {
-    throw APIException(
-      code: 0,
-      textCode: e.graphqlErrors.first.extensions?['code'],
-    );
-  }
-
-  if (e is AuthException || e is CacheException) {
-    throw e;
-  }
-
-  throw const GeneralException();
 }

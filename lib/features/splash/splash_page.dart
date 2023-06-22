@@ -28,13 +28,10 @@ class _SplashPageState extends State<SplashPage> {
     _splashController.isUserLogged();
     _splashController.addListener(() {
       if (_splashController.state is AuthenticatedUser) {
-        final state = _splashController.state as AuthenticatedUser;
-        if (state.isReady) {
-          Navigator.pushReplacementNamed(
-            context,
-            NamedRoute.home,
-          );
-        }
+        Navigator.pushReplacementNamed(
+          context,
+          NamedRoute.home,
+        );
       } else {
         Navigator.pushReplacementNamed(
           context,
@@ -66,27 +63,9 @@ class _SplashPageState extends State<SplashPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'meu',
+              'financy',
               style: AppTextStyles.bigText50.copyWith(color: AppColors.white),
             ),
-            Text(
-              'financeiro',
-              style: AppTextStyles.bigText50.copyWith(color: AppColors.white),
-            ),
-            AnimatedBuilder(
-                animation: _splashController,
-                builder: (context, _) {
-                  if (_splashController.state is AuthenticatedUser) {
-                    final state = _splashController.state as AuthenticatedUser;
-                    return Text(
-                      state.message,
-                      style: AppTextStyles.smallText13
-                          .copyWith(color: AppColors.white),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                }),
-            const SizedBox(height: 16.0),
             const CustomCircularProgressIndicator(),
           ],
         ),

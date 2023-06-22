@@ -1,4 +1,4 @@
-abstract class DataService<R> {
+abstract class ApiService<T, R> {
   Future<R> create({
     required String path,
     Map<String, dynamic> params = const {},

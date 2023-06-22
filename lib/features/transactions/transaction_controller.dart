@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
 
-import '../../../repositories/repositories.dart';
-import '../../../services/services.dart';
-import '../../models/models.dart';
+import '../../common/models/transaction_model.dart';
+import '../../common/models/user_model.dart';
+import '../../repositories/transaction_repository.dart';
+import '../../services/secure_storage.dart';
 import 'transaction_state.dart';
 
 class TransactionController extends ChangeNotifier {
@@ -29,8 +30,8 @@ class TransactionController extends ChangeNotifier {
     final data = await storage.readOne(key: 'CURRENT_USER');
     final user = UserModel.fromJson(data ?? '');
     final result = await transactionRepository.addTransaction(
-      transaction: transaction,
-      userId: user.id!,
+      transaction,
+      user.id!,
     );
 
     result.fold(
@@ -42,16 +43,6 @@ class TransactionController extends ChangeNotifier {
   Future<void> updateTransaction(TransactionModel transaction) async {
     _changeState(TransactionStateLoading());
     final result = await transactionRepository.updateTransaction(transaction);
-
-    result.fold(
-      (error) => _changeState(TransactionStateError(message: error.message)),
-      (data) => _changeState(TransactionStateSuccess()),
-    );
-  }
-
-  Future<void> deleteTransaction(TransactionModel transaction) async {
-    _changeState(TransactionStateLoading());
-    final result = await transactionRepository.deleteTransaction(transaction);
 
     result.fold(
       (error) => _changeState(TransactionStateError(message: error.message)),

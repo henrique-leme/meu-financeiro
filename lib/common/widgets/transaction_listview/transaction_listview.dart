@@ -1,60 +1,62 @@
+import 'package:meu_financeiro/common/widgets/custom_bottom_sheet.dart';
+import 'package:meu_financeiro/common/widgets/custom_snackbar.dart';
+import 'package:meu_financeiro/common/widgets/primary_button.dart';
+import 'package:meu_financeiro/common/widgets/transaction_listview/transaction_listview_controller.dart';
+import 'package:meu_financeiro/common/widgets/transaction_listview/transaction_listview_state.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
-import '../../locator.dart';
-import '../constants/constants.dart';
-import '../extensions/extensions.dart';
-import '../features/transaction/transaction_controller.dart';
-import '../features/transaction/transaction_state.dart';
-import '../models/models.dart';
-import 'widgets.dart';
+import '../../../features/home/home_controller.dart';
+import '../../../features/home/widgets/balance_card/balance_card_widget_controller.dart';
+import '../../../features/wallet/wallet_controller.dart';
+import '../../../locator.dart';
+import '../../constants/app_colors.dart';
+import '../../constants/app_text_styles.dart';
+import '../../extensions/date_formatter.dart';
+import '../../models/transaction_model.dart';
+import '../custom_circular_progress_indicator.dart';
 
 class TransactionListView extends StatefulWidget {
   const TransactionListView({
     super.key,
     required this.transactionList,
     this.itemCount,
-    required this.onChange,
-  }) : showDate = false;
-
-  const TransactionListView.withCalendar({
-    super.key,
-    required this.transactionList,
-    this.itemCount,
-    required this.onChange,
-  }) : showDate = true;
+    this.onLoading,
+    this.isLoading = false,
+  });
 
   final List<TransactionModel> transactionList;
   final int? itemCount;
-  final bool showDate;
-
-  ///Called when transaction is updated or deleted
-  final VoidCallback onChange;
+  final ValueChanged<bool>? onLoading;
+  final bool isLoading;
 
   @override
   State<TransactionListView> createState() => _TransactionListViewState();
 }
 
 class _TransactionListViewState extends State<TransactionListView>
-    with CustomModalSheetMixin, CustomSnackBar, SingleTickerProviderStateMixin {
+    with CustomModalSheetMixin, CustomSnackBar {
   final _scrollController = ScrollController();
-  final transactionController = locator.get<TransactionController>();
+  final _transactionListViewController =
+      locator.get<TransactionListViewController>();
   bool? confirmDelete = false;
-
-  late TabController _tabController;
-  late DateTime _currentMonth;
 
   @override
   void initState() {
     super.initState();
 
-    _currentMonth = DateTime.now();
-    _tabController = TabController(length: 1, vsync: this);
+    _scrollController.addListener(() {
+      if (widget.onLoading != null) {
+        widget.onLoading!(_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent);
+      }
+    });
 
-    transactionController.addListener(() {
-      if (transactionController.state is TransactionStateError) {
-        if (!mounted) return;
-        final state = transactionController.state as TransactionStateError;
+    _transactionListViewController.addListener(() {
+      final state = _transactionListViewController.state;
+      if (state is TransactionListViewStateSuccess) {
+        _fetchUpdates();
+      }
+      if (state is TransactionListViewStateError) {
         setState(() {
           showCustomSnackBar(
             context: context,
@@ -66,26 +68,17 @@ class _TransactionListViewState extends State<TransactionListView>
     });
   }
 
-  void _goToPreviousMonth() {
-    setState(() {
-      _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1);
-      _tabController.index = 0;
-    });
-  }
-
-  void _goToNextMonth() {
-    setState(() {
-      _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1);
-      _tabController.index = 0;
-    });
-  }
-
   @override
   void dispose() {
-    _tabController.dispose();
     _scrollController.dispose();
-    locator.resetLazySingleton<TransactionController>();
+    _transactionListViewController.dispose();
     super.dispose();
+  }
+
+  void _fetchUpdates() {
+    locator.get<BalanceCardWidgetController>().getBalances();
+    locator.get<WalletController>().getAllTransactions();
+    locator.get<HomeController>().getLatestTransactions();
   }
 
   @override
@@ -94,55 +87,16 @@ class _TransactionListViewState extends State<TransactionListView>
       physics: const BouncingScrollPhysics(),
       controller: _scrollController,
       slivers: [
-        if (widget.showDate)
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _SliverAppBarDelegate(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                    color: AppColors.green,
-                    onPressed: _goToPreviousMonth,
-                  ),
-                  TabBar(
-                    labelColor: AppColors.green,
-                    labelStyle: AppTextStyles.mediumText16w600,
-                    controller: _tabController,
-                    isScrollable: true,
-                    tabs: [
-                      Tab(
-                        text: DateFormat('MMMM yyyy').format(_currentMonth),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.arrow_forward_ios_outlined),
-                    color: AppColors.green,
-                    onPressed: _goToNextMonth,
-                  ),
-                ],
-              ),
-            ),
-          ),
         SliverList(
           delegate: SliverChildBuilderDelegate(
             childCount: widget.itemCount ?? widget.transactionList.length,
             (context, index) {
               final item = widget.transactionList[index];
-              final itemDate = DateTime.fromMillisecondsSinceEpoch(item.date);
-              final isCurrentDate = itemDate.month == _currentMonth.month &&
-                  itemDate.year == _currentMonth.year;
 
               final color =
                   item.value.isNegative ? AppColors.outcome : AppColors.income;
 
               final value = "\$${item.value.toStringAsFixed(2)}";
-
-              if (widget.showDate && !isCurrentDate) {
-                return const SizedBox.shrink();
-              }
 
               return Dismissible(
                 key: UniqueKey(),
@@ -157,28 +111,26 @@ class _TransactionListViewState extends State<TransactionListView>
                     color: Colors.white,
                   ),
                 ),
-                onDismissed: (direction) async {
+                onDismissed: (direction) {
                   if (confirmDelete!) {
-                    await transactionController.deleteTransaction(item);
-                    if (!mounted) return;
-                    widget.onChange();
+                    _transactionListViewController.deleteTransaction(item);
                   }
                 },
                 confirmDismiss: (direction) async {
                   confirmDelete = await showCustomModalBottomSheet(
                     context: context,
-                    content: 'Confirme para deletar',
+                    content: 'Confirm delete transaction',
                     actions: [
                       Flexible(
                         child: PrimaryButton(
-                          text: 'Cancelar',
+                          text: 'Cancel',
                           onPressed: () => Navigator.pop(context),
                         ),
                       ),
                       const SizedBox(width: 16.0),
                       Flexible(
                         child: PrimaryButton(
-                          text: 'Confirmar',
+                          text: 'Confirm',
                           onPressed: () {
                             if (mounted) {
                               Navigator.pop(context, true);
@@ -199,8 +151,7 @@ class _TransactionListViewState extends State<TransactionListView>
                       arguments: item,
                     );
                     if (result != null) {
-                      if (!mounted) return;
-                      widget.onChange();
+                      _fetchUpdates();
                     }
                   },
                   contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -231,7 +182,7 @@ class _TransactionListViewState extends State<TransactionListView>
                         style: AppTextStyles.mediumText18.apply(color: color),
                       ),
                       Text(
-                        item.status ? 'Feito' : 'Pendente',
+                        item.status ? 'done' : 'pending',
                         style: AppTextStyles.smallText13
                             .apply(color: AppColors.lightGrey),
                       ),
@@ -242,36 +193,11 @@ class _TransactionListViewState extends State<TransactionListView>
             },
           ),
         ),
+        if (widget.isLoading)
+          const SliverToBoxAdapter(
+            child: CustomCircularProgressIndicator(),
+          ),
       ],
     );
-  }
-}
-
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
-
-  _SliverAppBarDelegate({required this.child});
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(
-      color: Colors.white,
-      child: child,
-    );
-  }
-
-  @override
-  double get maxExtent => 48.0;
-
-  @override
-  double get minExtent => 48.0;
-
-  @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return true;
   }
 }

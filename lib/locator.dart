@@ -1,19 +1,22 @@
+import 'package:meu_financeiro/common/widgets/transaction_listview/transaction_listview_controller.dart';
 import 'package:get_it/get_it.dart';
 
-import 'common/features/balance/balance.dart';
-import 'common/features/transaction/transaction.dart';
 import 'features/home/home_controller.dart';
+import 'features/home/widgets/balance_card/balance_card_widget_controller.dart';
 import 'features/sign_in/sign_in_controller.dart';
 import 'features/sign_up/sign_up_controller.dart';
 import 'features/splash/splash_controller.dart';
+import 'features/transactions/transaction_controller.dart';
 import 'features/wallet/wallet_controller.dart';
-import 'repositories/repositories.dart';
-import 'services/services.dart';
+import 'repositories/transaction_repository.dart';
+import 'services/auth_service.dart';
+import 'services/firebase_auth_service.dart';
+import 'services/graphql_service.dart';
+import 'services/secure_storage.dart';
 
 final locator = GetIt.instance;
 
 void setupDependencies() {
-  //Register Services
   locator.registerFactory<AuthService>(
     () => FirebaseAuthService(),
   );
@@ -24,34 +27,9 @@ void setupDependencies() {
     ).init(),
   );
 
-  locator.registerSingletonAsync<DatabaseService>(
-    () async => DatabaseService().init(),
-  );
-
-  locator.registerFactory<SyncService>(
-    () => SyncService(
-      connectionService: const ConnectionService(),
-      databaseService: locator.get<DatabaseService>(),
-      graphQLService: locator.get<GraphQLService>(),
-      secureStorageService: const SecureStorageService(),
-    ),
-  );
-
-  //Register Repositories
-
-  locator.registerFactory<TransactionRepository>(
-    () => TransactionRepositoryImpl(
-      databaseService: locator.get<DatabaseService>(),
-      syncService: locator.get<SyncService>(),
-    ),
-  );
-
-  //Register Controllers
-
   locator.registerFactory<SplashController>(
     () => SplashController(
       secureStorageService: const SecureStorageService(),
-      syncService: locator.get<SyncService>(),
     ),
   );
 
@@ -59,7 +37,6 @@ void setupDependencies() {
     () => SignInController(
       authService: locator.get<AuthService>(),
       secureStorageService: const SecureStorageService(),
-      syncService: locator.get<SyncService>(),
     ),
   );
 
@@ -70,34 +47,40 @@ void setupDependencies() {
     ),
   );
 
-  locator.registerLazySingleton<HomeController>(
-    () => HomeController(
-      transactionRepository: locator.get<TransactionRepository>(),
-      syncService: SyncService(
-        connectionService: const ConnectionService(),
-        databaseService: locator.get<DatabaseService>(),
-        graphQLService: locator.get<GraphQLService>(),
-        secureStorageService: const SecureStorageService(),
-      ),
+  locator.registerFactory<TransactionRepository>(
+    () => TransactionRepositoryImpl(
+      graphqlService: locator.get<GraphQLService>(),
     ),
   );
 
-  locator.registerLazySingleton<WalletController>(
+  locator.registerLazySingleton<HomeController>(
+    () => HomeController(
+      transactionRepository: locator.get<TransactionRepository>(),
+    ),
+  );
+
+  locator.registerLazySingleton<BalanceCardWidgetController>(
+    () => BalanceCardWidgetController(
+      transactionRepository: locator.get<TransactionRepository>(),
+    ),
+  );
+
+  locator.registerFactory<TransactionController>(
+    () => TransactionController(
+      transactionRepository: locator.get<TransactionRepository>(),
+      storage: const SecureStorageService(),
+    ),
+  );
+
+  locator.registerLazySingleton(
     () => WalletController(
       transactionRepository: locator.get<TransactionRepository>(),
     ),
   );
 
-  locator.registerLazySingleton<BalanceController>(
-    () => BalanceController(
+  locator.registerFactory<TransactionListViewController>(
+    () => TransactionListViewController(
       transactionRepository: locator.get<TransactionRepository>(),
-    ),
-  );
-
-  locator.registerLazySingleton<TransactionController>(
-    () => TransactionController(
-      transactionRepository: locator.get<TransactionRepository>(),
-      storage: const SecureStorageService(),
     ),
   );
 }

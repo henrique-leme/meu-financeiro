@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../locator.dart';
-import '../../services/services.dart';
+import '../../services/auth_service.dart';
+import '../../services/secure_storage.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -23,17 +24,16 @@ class _ProfilePageState extends State<ProfilePage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text("Perfil"),
+            const Text("Profile"),
             TextButton(
               onPressed: () async {
                 await locator.get<AuthService>().signOut();
                 await const SecureStorageService().deleteAll();
-                await locator.get<DatabaseService>().deleteDB;
                 if (mounted) {
                   Navigator.popUntil(context, ModalRoute.withName('/'));
                 }
               },
-              child: const Text("Deslogar"),
+              child: const Text("Logout"),
             )
           ],
         ),

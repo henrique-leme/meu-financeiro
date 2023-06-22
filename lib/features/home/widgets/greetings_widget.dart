@@ -1,9 +1,8 @@
+import 'package:meu_financeiro/services/firebase_auth_service.dart';
 import 'package:flutter/material.dart';
-import '../../common/models/models.dart';
-import '../../services/auth_service.dart';
 
-import '../../services/firebase_auth_service.dart';
-import '../constants/constants.dart';
+import '../../../common/constants/app_colors.dart';
+import '../../../common/constants/app_text_styles.dart';
 
 class GreetingsWidget extends StatefulWidget {
   const GreetingsWidget({

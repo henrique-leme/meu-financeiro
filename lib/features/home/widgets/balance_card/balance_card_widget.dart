@@ -1,17 +1,20 @@
 import 'dart:developer';
 
-import '../../../common/constants/constants.dart';
-import '../../../common/extensions/extensions.dart';
-import '../../../common/features/balance/balance.dart';
 import 'package:flutter/material.dart';
 
-class BalanceCardWidget extends StatelessWidget {
-  const BalanceCardWidget({
+import '../../../../common/constants/app_colors.dart';
+import '../../../../common/constants/app_text_styles.dart';
+import '../../../../common/extensions/sizes.dart';
+import 'balance_card_widget_controller.dart';
+import 'balance_card_widget_state.dart';
+
+class BalanceCard extends StatelessWidget {
+  const BalanceCard({
     Key? key,
     required this.controller,
   }) : super(key: key);
 
-  final BalanceController controller;
+  final BalanceCardWidgetController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +47,7 @@ class BalanceCardWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Saldo Total',
+                      'Total Balance',
                       textScaleFactor: textScaleFactor,
                       style: AppTextStyles.mediumText16w600
                           .apply(color: AppColors.white),
@@ -52,7 +55,8 @@ class BalanceCardWidget extends StatelessWidget {
                     AnimatedBuilder(
                         animation: controller,
                         builder: (context, _) {
-                          if (controller.state is BalanceStateLoading) {
+                          if (controller.state
+                              is BalanceCardWidgetStateLoading) {
                             return Container(
                               color: AppColors.secondaryGreen,
                               constraints:
@@ -73,6 +77,22 @@ class BalanceCardWidget extends StatelessWidget {
                           );
                         })
                   ],
+                ),
+                GestureDetector(
+                  onTap: () => log('options'),
+                  child: PopupMenuButton(
+                    padding: EdgeInsets.zero,
+                    child: const Icon(
+                      Icons.more_horiz,
+                      color: AppColors.white,
+                    ),
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        height: 24.0,
+                        child: Text("Item 1"),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -117,7 +137,7 @@ class TransactionValueWidget extends StatelessWidget {
     required this.controller,
     this.type = TransactionType.income,
   });
-  final BalanceController controller;
+  final BalanceCardWidgetController controller;
   final double amount;
   final TransactionType type;
 
@@ -153,7 +173,7 @@ class TransactionValueWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              type == TransactionType.income ? 'Entrada' : 'Saída',
+              type == TransactionType.income ? 'Income' : 'Expense',
               textScaleFactor: textScaleFactor,
               style:
                   AppTextStyles.mediumText16w500.apply(color: AppColors.white),
@@ -161,7 +181,7 @@ class TransactionValueWidget extends StatelessWidget {
             AnimatedBuilder(
                 animation: controller,
                 builder: (context, _) {
-                  if (controller.state is BalanceStateLoading) {
+                  if (controller.state is BalanceCardWidgetStateLoading) {
                     return Container(
                       color: AppColors.secondaryGreen,
                       constraints: BoxConstraints.tightFor(width: 80.0.w),

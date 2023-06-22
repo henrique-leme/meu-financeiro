@@ -1,8 +1,8 @@
+import 'package:meu_financeiro/common/constants/app_colors.dart';
+import 'package:meu_financeiro/common/constants/app_text_styles.dart';
+import 'package:meu_financeiro/common/extensions/sizes.dart';
+import 'package:meu_financeiro/features/home/widgets/greetings_widget.dart';
 import 'package:flutter/material.dart';
-
-import '../constants/constants.dart';
-import '../extensions/extensions.dart';
-import 'widgets.dart';
 
 class AppHeader extends StatefulWidget {
   final String? title;

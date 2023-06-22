@@ -2,14 +2,6 @@ abstract class SplashState {}
 
 class SplashStateInitial extends SplashState {}
 
-class AuthenticatedUser extends SplashState {
-  final String message;
-  final bool isReady;
-
-  AuthenticatedUser({
-    this.message = '',
-    this.isReady = false,
-  });
-}
+class AuthenticatedUser extends SplashState {}
 
 class UnauthenticatedUser extends SplashState {}
