@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> with CustomModalSheetMixin {
         showCustomModalBottomSheet(
           context: context,
           content: (homeController.state as HomeStateError).message,
-          buttonText: 'Go to login',
+          buttonText: 'Faça o login',
           isDismissible: false,
           onPressed: () => Navigator.pushNamedAndRemoveUntil(
             context,
@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage> with CustomModalSheetMixin {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Transaction History',
+                        'Histórico de transações',
                         style: AppTextStyles.mediumText18,
                       ),
                       GestureDetector(
@@ -82,7 +82,7 @@ class _HomePageState extends State<HomePage> with CustomModalSheetMixin {
                           homeController.pageController.jumpToPage(2);
                         },
                         child: const Text(
-                          'See all',
+                          'Ver mais',
                           style: AppTextStyles.inputLabelText,
                         ),
                       ),

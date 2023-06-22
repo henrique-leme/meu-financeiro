@@ -44,7 +44,7 @@ class _WalletPageState extends State<WalletPage>
         showCustomModalBottomSheet(
           context: context,
           content: (walletController.state as WalletStateError).message,
-          buttonText: 'Go to login',
+          buttonText: 'Faça o login',
           isDismissible: false,
           onPressed: () => Navigator.pushNamedAndRemoveUntil(
             context,
@@ -73,7 +73,7 @@ class _WalletPageState extends State<WalletPage>
       child: Stack(
         children: [
           AppHeader(
-            title: 'Wallet',
+            title: 'Carteira',
             onPressed: () {
               locator.get<HomeController>().pageController.jumpToPage(0);
             },
@@ -93,7 +93,7 @@ class _WalletPageState extends State<WalletPage>
                 child: Column(
                   children: [
                     Text(
-                      'Total Balance',
+                      'Saldo total',
                       style: AppTextStyles.inputLabelText
                           .apply(color: AppColors.grey),
                     ),
@@ -135,7 +135,7 @@ class _WalletPageState extends State<WalletPage>
                                   ),
                                 ),
                                 child: Text(
-                                  'Transactions',
+                                  'Transações',
                                   style: AppTextStyles.mediumText16w500
                                       .apply(color: AppColors.darkGrey),
                                 ),
@@ -153,7 +153,7 @@ class _WalletPageState extends State<WalletPage>
                                   ),
                                 ),
                                 child: Text(
-                                  'Upcoming Bills',
+                                  'Futuros Pagamentos',
                                   style: AppTextStyles.mediumText16w500
                                       .apply(color: AppColors.darkGrey),
                                 ),

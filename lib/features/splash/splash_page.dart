@@ -63,7 +63,11 @@ class _SplashPageState extends State<SplashPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'financy',
+              'meu',
+              style: AppTextStyles.bigText50.copyWith(color: AppColors.white),
+            ),
+            Text(
+              'financeiro',
               style: AppTextStyles.bigText50.copyWith(color: AppColors.white),
             ),
             const CustomCircularProgressIndicator(),

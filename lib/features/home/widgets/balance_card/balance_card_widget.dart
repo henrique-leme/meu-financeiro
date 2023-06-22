@@ -47,7 +47,7 @@ class BalanceCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Total Balance',
+                      'Saldo total',
                       textScaleFactor: textScaleFactor,
                       style: AppTextStyles.mediumText16w600
                           .apply(color: AppColors.white),
@@ -77,22 +77,6 @@ class BalanceCard extends StatelessWidget {
                           );
                         })
                   ],
-                ),
-                GestureDetector(
-                  onTap: () => log('options'),
-                  child: PopupMenuButton(
-                    padding: EdgeInsets.zero,
-                    child: const Icon(
-                      Icons.more_horiz,
-                      color: AppColors.white,
-                    ),
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        height: 24.0,
-                        child: Text("Item 1"),
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),
@@ -173,7 +157,7 @@ class TransactionValueWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              type == TransactionType.income ? 'Income' : 'Expense',
+              type == TransactionType.income ? 'Entrada' : 'Saída',
               textScaleFactor: textScaleFactor,
               style:
                   AppTextStyles.mediumText16w500.apply(color: AppColors.white),

@@ -35,8 +35,8 @@ class _TransactionPageState extends State<TransactionPage>
 
   final _formKey = GlobalKey<FormState>();
 
-  final _incomes = ['Services', 'Investment', 'Other'];
-  final _outcomes = ['House', 'Grocery', 'Other'];
+  final _incomes = ['Salário', 'Investimentos', 'Renda extra', 'Outros'];
+  final _outcomes = ['Pagamentos', 'Cartão', 'Despesas Mensais', 'Outros'];
   DateTime? _newDate;
   bool value = false;
 
@@ -124,8 +124,8 @@ class _TransactionPageState extends State<TransactionPage>
         children: [
           AppHeader(
             title: widget.transaction != null
-                ? 'Edit Transaction'
-                : 'Add Transaction',
+                ? 'Editar transação'
+                : 'Adicoonar transação',
           ),
           Positioned(
             top: 164.h,
@@ -171,7 +171,7 @@ class _TransactionPageState extends State<TransactionPage>
                                     ),
                                   ),
                                   child: Text(
-                                    'Income',
+                                    'Entrada',
                                     style: AppTextStyles.mediumText16w500
                                         .apply(color: AppColors.darkGrey),
                                   ),
@@ -189,7 +189,7 @@ class _TransactionPageState extends State<TransactionPage>
                                     ),
                                   ),
                                   child: Text(
-                                    'Expense',
+                                    'Saída',
                                     style: AppTextStyles.mediumText16w500
                                         .apply(color: AppColors.darkGrey),
                                   ),
@@ -204,8 +204,8 @@ class _TransactionPageState extends State<TransactionPage>
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         controller: _amountController,
                         keyboardType: TextInputType.number,
-                        labelText: "Amount",
-                        hintText: "Type an amount",
+                        labelText: "Valor",
+                        hintText: "Digite um valor",
                         suffixIcon: StatefulBuilder(
                           builder: (context, setState) {
                             return IconButton(
@@ -229,8 +229,8 @@ class _TransactionPageState extends State<TransactionPage>
                       CustomTextFormField(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         controller: _descriptionController,
-                        labelText: 'Description',
-                        hintText: 'Add a description',
+                        labelText: 'Descrição',
+                        hintText: 'Adicione uma descrição',
                         validator: (value) {
                           if (_descriptionController.text.isEmpty) {
                             return 'This field cannot be empty.';
@@ -242,8 +242,8 @@ class _TransactionPageState extends State<TransactionPage>
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         controller: _categoryController,
                         readOnly: true,
-                        labelText: "Category",
-                        hintText: "Select a category",
+                        labelText: "Categoria",
+                        hintText: "Selecione uma categoria",
                         validator: (value) {
                           if (_categoryController.text.isEmpty) {
                             return 'This field cannot be empty.';
@@ -275,8 +275,8 @@ class _TransactionPageState extends State<TransactionPage>
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         controller: _dateController,
                         readOnly: true,
-                        labelText: "Date",
-                        hintText: "Select a date",
+                        labelText: "Data",
+                        hintText: "Selecione uma data",
                         validator: (value) {
                           if (_dateController.text.isEmpty) {
                             return 'This field cannot be empty.';
@@ -307,7 +307,9 @@ class _TransactionPageState extends State<TransactionPage>
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24.0),
                         child: PrimaryButton(
-                          text: widget.transaction != null ? 'Save' : 'Add',
+                          text: widget.transaction != null
+                              ? 'Salvar'
+                              : 'Adicionar',
                           onPressed: () async {
                             FocusScope.of(context).unfocus();
                             if (_formKey.currentState!.validate()) {
