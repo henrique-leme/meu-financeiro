@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
-import '../extensions/sizes.dart';
+import '../utils/sizes.dart';
 
 class NotificationWidget extends StatelessWidget {
   const NotificationWidget({

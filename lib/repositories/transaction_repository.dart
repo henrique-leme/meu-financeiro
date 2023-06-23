@@ -2,10 +2,10 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../common/constants/mutations.dart';
 import '../common/constants/queries.dart';
-import '../common/models/balances_model.dart';
-import '../common/models/transaction_model.dart';
-import '../data/data_result.dart';
-import '../data/exceptions.dart';
+import '../models/balances_model.dart';
+import '../models/transaction_model.dart';
+import '../common/data/data_result.dart';
+import '../common/data/data_exceptions.dart';
 import '../services/api_service.dart';
 
 abstract class TransactionRepository {

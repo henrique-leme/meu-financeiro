@@ -1,6 +1,6 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-import '../data/exceptions.dart';
+import '../common/data/data_exceptions.dart';
 import 'api_service.dart';
 import 'auth_service.dart';
 

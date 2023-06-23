@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
-import '../extensions/page_controller_ext.dart';
+import '../../controllers/page_controller_ext.dart';
 
 class CustomBottomAppBar extends StatefulWidget {
   final PageController controller;
