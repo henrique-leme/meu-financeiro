@@ -101,4 +101,13 @@ class FirebaseAuthService implements AuthService {
     }
     return null;
   }
+
+  Future<String?> getCurrrentUserEmail() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      await user.reload();
+      return user.email;
+    }
+    return null;
+  }
 }
