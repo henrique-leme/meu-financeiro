@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:meu_financeiro/common/constants/app_colors.dart';
 import 'package:meu_financeiro/common/constants/app_text_styles.dart';
 
-class CustomTextFormField extends StatefulWidget {
+class CustomSelectFileField extends StatefulWidget {
   final EdgeInsetsGeometry? padding;
   final String? hintText;
   final String? labelText;
@@ -20,7 +21,7 @@ class CustomTextFormField extends StatefulWidget {
   final GestureTapCallback? onTap;
   final bool readOnly;
 
-  const CustomTextFormField({
+  const CustomSelectFileField({
     Key? key,
     this.padding,
     this.hintText,
@@ -40,10 +41,25 @@ class CustomTextFormField extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<CustomTextFormField> createState() => _CustomTextFormFieldState();
+  State<CustomSelectFileField> createState() => _CustomSelectFileFieldState();
 }
 
-class _CustomTextFormFieldState extends State<CustomTextFormField> {
+Future<String?> pickPDFFile() async {
+  FilePickerResult? result = await FilePicker.platform.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: ['pdf'],
+  );
+
+  if (result != null) {
+    PlatformFile file = result.files.first;
+    String path = file.path!;
+    return path;
+  }
+
+  return null;
+}
+
+class _CustomSelectFileFieldState extends State<CustomSelectFileField> {
   final defaultBorder = const OutlineInputBorder(
     borderSide: BorderSide(
       color: AppColors.primaryGreen,
@@ -68,7 +84,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
           ),
       child: TextFormField(
         readOnly: widget.readOnly,
-        onTap: widget.onTap,
+        onTap: widget.onTap ?? () => pickPDFFile(),
         onChanged: (value) {
           if (value.length == 1) {
             setState(() {

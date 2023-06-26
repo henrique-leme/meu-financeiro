@@ -125,7 +125,7 @@ class _TransactionPageState extends State<TransactionPage>
           AppHeader(
             title: widget.transaction != null
                 ? 'Editar transação'
-                : 'Adicoonar transação',
+                : 'Adicionar transação',
           ),
           Positioned(
             top: 164.h,

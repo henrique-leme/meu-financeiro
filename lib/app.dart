@@ -6,7 +6,7 @@ import 'package:meu_financeiro/views/onboarding/onboarding_page.dart';
 import 'package:meu_financeiro/views/profile/profile_page.dart';
 import 'package:meu_financeiro/views/sign_in/sign_in_page.dart';
 import 'package:meu_financeiro/views/sign_up/sign_up_page.dart';
-import 'package:meu_financeiro/views/report/report_page.dart';
+import 'package:meu_financeiro/views/analysis/analysis_page.dart';
 import 'package:meu_financeiro/views/transactions/transaction_page.dart';
 import 'package:meu_financeiro/views/wallet/wallet_page.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +27,7 @@ class App extends StatelessWidget {
         AppRoutes.signUp: (context) => const SignUpPage(),
         AppRoutes.signIn: (context) => const SignInPage(),
         AppRoutes.home: (context) => const HomePageView(),
-        AppRoutes.stats: (context) => const ReportsPage(),
+        AppRoutes.analysis: (context) => const AnalysisPage(),
         AppRoutes.wallet: (context) => const WalletPage(),
         AppRoutes.profile: (context) => const ProfilePage(),
         AppRoutes.transaction: (context) {

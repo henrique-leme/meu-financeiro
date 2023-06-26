@@ -134,7 +134,7 @@ class _SignUpPageState extends State<SignUpPage> with CustomModalSheetMixin {
                 CustomTextFormField(
                   controller: _cpfController,
                   labelText: "CPF",
-                  hintText: "000.000.000.00",
+                  hintText: "000.000.000-00",
                   validator: Validator.validateCpf,
                 ),
               ],

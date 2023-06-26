@@ -4,7 +4,7 @@ import '../../common/constants/app_colors.dart';
 import '../../common/widgets/custom_bottom_app_bar.dart';
 import '../../locator.dart';
 import '../profile/profile_page.dart';
-import '../report/report_page.dart';
+import '../analysis/analysis_page.dart';
 import '../../controllers/wallet_controller.dart';
 import '../wallet/wallet_page.dart';
 import '../../controllers/home_controller.dart';
@@ -43,7 +43,7 @@ class _HomePageViewState extends State<HomePageView> {
         controller: homeController.pageController,
         children: const [
           HomePage(),
-          ReportsPage(),
+          AnalysisPage(),
           WalletPage(),
           ProfilePage(),
         ],
@@ -74,7 +74,7 @@ class _HomePageViewState extends State<HomePageView> {
             ),
           ),
           CustomBottomAppBarItem(
-            label: 'stats',
+            label: 'analysis',
             primaryIcon: Icons.analytics,
             secondaryIcon: Icons.analytics_outlined,
             onPressed: () => homeController.pageController.jumpToPage(
