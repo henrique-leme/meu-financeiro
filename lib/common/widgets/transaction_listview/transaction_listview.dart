@@ -182,7 +182,7 @@ class _TransactionListViewState extends State<TransactionListView>
                         style: AppTextStyles.mediumText18.apply(color: color),
                       ),
                       Text(
-                        item.status ? 'done' : 'pending',
+                        item.status ? 'feito' : 'pendente',
                         style: AppTextStyles.smallText13
                             .apply(color: AppColors.lightGrey),
                       ),
