@@ -44,11 +44,8 @@ class CustomSelectFileField extends StatefulWidget {
   State<CustomSelectFileField> createState() => _CustomSelectFileFieldState();
 }
 
-Future<String?> pickPDFFile() async {
-  FilePickerResult? result = await FilePicker.platform.pickFiles(
-    type: FileType.custom,
-    allowedExtensions: ['pdf'],
-  );
+Future<String?> pickOFXFile() async {
+  FilePickerResult? result = await FilePicker.platform.pickFiles();
 
   if (result != null) {
     PlatformFile file = result.files.first;
@@ -84,7 +81,7 @@ class _CustomSelectFileFieldState extends State<CustomSelectFileField> {
           ),
       child: TextFormField(
         readOnly: widget.readOnly,
-        onTap: widget.onTap ?? () => pickPDFFile(),
+        onTap: widget.onTap ?? () => pickOFXFile(),
         onChanged: (value) {
           if (value.length == 1) {
             setState(() {

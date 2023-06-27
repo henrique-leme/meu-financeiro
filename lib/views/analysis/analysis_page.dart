@@ -1,29 +1,24 @@
-import 'dart:developer';
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:meu_financeiro/common/widgets/custm_sendfile_button.dart';
+import 'package:meu_financeiro/models/analysis_model.dart';
+// ignore: depend_on_referenced_packages
 import 'package:path/path.dart' as path;
 
 import '../../common/constants/app_colors.dart';
-import '../../common/utils/date_formatter.dart';
 import '../../common/utils/sizes.dart';
-import '../../models/transaction_model.dart';
 import '../../common/utils/money_mask.dart';
 import '../../common/widgets/app_header.dart';
-import '../../common/widgets/custom_circular_progress_indicator.dart';
 import '../../common/widgets/custom_snackbar.dart';
 import '../../common/widgets/custom_text_form_field.dart';
 import '../../common/widgets/primary_button.dart';
+import '../../controllers/home_controller.dart';
 import '../../locator.dart';
-import '../../controllers/transaction_controller.dart';
-import 'analysis_state.dart';
 
 class AnalysisPage extends StatefulWidget {
-  final TransactionModel? transaction;
+  final AnalysisModel? analysis;
   const AnalysisPage({
     super.key,
-    this.transaction,
+    this.analysis,
   });
 
   @override
@@ -32,80 +27,59 @@ class AnalysisPage extends StatefulWidget {
 
 class _AnalysisPageState extends State<AnalysisPage>
     with SingleTickerProviderStateMixin, CustomSnackBar {
-  final _transactionController = locator.get<TransactionController>();
-
   final _formKey = GlobalKey<FormState>();
 
-  DateTime? _newDate;
   bool value = false;
   String? _selectedFileName;
 
   final _descriptionController = TextEditingController();
-  final _pdfController = TextEditingController();
+  final _ofxController = TextEditingController();
   final _dateController = TextEditingController();
   final _amountController = MoneyMaskedText(
     prefix: '\$',
   );
 
-  late final TabController _tabController;
-
-  int get _initialIndex {
-    if (widget.transaction != null && widget.transaction!.value.isNegative) {
-      return 1;
-    }
-
-    return 0;
-  }
-
   @override
   void initState() {
     super.initState();
-    _amountController.updateValue(widget.transaction?.value ?? 0);
-    value = widget.transaction?.status ?? false;
-    _descriptionController.text = widget.transaction?.description ?? '';
-    _pdfController.text = widget.transaction?.category ?? '';
-    _newDate =
-        DateTime.fromMillisecondsSinceEpoch(widget.transaction?.date ?? 0);
-    _dateController.text = widget.transaction?.date != null
-        ? DateTime.fromMillisecondsSinceEpoch(widget.transaction!.date).toText
-        : '';
-    _tabController = TabController(
-      length: 2,
-      vsync: this,
-      initialIndex: _initialIndex,
-    );
-
-    _transactionController.addListener(() {
-      if (_transactionController.state is AnalysisStateLoading) {
-        showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) => const CustomCircularProgressIndicator(),
-        );
-      }
-      if (_transactionController.state is AnalysisStateSuccess) {
-        Navigator.of(context).pop();
-      }
-      if (_transactionController.state is AnalysisStateError) {
-        final error = _transactionController.state as AnalysisStateError;
-        showCustomSnackBar(
-          context: context,
-          text: error.message,
-          type: SnackBarType.error,
-        );
-      }
-    });
+    _descriptionController.text = widget.analysis?.description ?? '';
+    _ofxController.text = widget.analysis?.path ?? '';
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     _amountController.dispose();
     _descriptionController.dispose();
-    _pdfController.dispose();
+    _ofxController.dispose();
     _dateController.dispose();
-    _transactionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _showAnalysisDialog(BuildContext context) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Análise'),
+          content: Text('Are you sure you want to analyze the purchase?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Perform analysis here
+              },
+              child: Text('Yes'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('No'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -113,7 +87,12 @@ class _AnalysisPageState extends State<AnalysisPage>
     return Scaffold(
       body: Stack(
         children: [
-          const AppHeader(title: 'Análise de Compra'),
+          AppHeader(
+            title: 'Análise de Compra',
+            onPressed: () {
+              locator.get<HomeController>().pageController.jumpToPage(0);
+            },
+          ),
           Positioned(
             top: 164.h,
             left: 28.w,
@@ -153,10 +132,10 @@ class _AnalysisPageState extends State<AnalysisPage>
                       ),
                       CustomSelectFileField(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        controller: _pdfController,
+                        controller: _ofxController,
                         readOnly: true,
                         labelText: "Selecione seu Extrato",
-                        hintText: "Selecione um arquivo PDF",
+                        hintText: "Selecione um arquivo OFX",
                         validator: (value) {
                           if (value?.isEmpty ?? true) {
                             return 'This field cannot be empty.';
@@ -164,11 +143,11 @@ class _AnalysisPageState extends State<AnalysisPage>
                           return null;
                         },
                         onTap: () async {
-                          String? pdfPath = await pickPDFFile();
-                          if (pdfPath != null) {
+                          String? ofxPath = await pickOFXFile();
+                          if (ofxPath != null) {
                             _selectedFileName =
-                                path.basenameWithoutExtension(pdfPath + '.pdf');
-                            _pdfController.text = _selectedFileName!;
+                                path.basenameWithoutExtension('$ofxPath.ofx');
+                            _ofxController.text = _selectedFileName!;
                           }
                         },
                       ),
@@ -178,50 +157,16 @@ class _AnalysisPageState extends State<AnalysisPage>
                         child: PrimaryButton(
                           text: 'Analisar Compra',
                           onPressed: () async {
-                            FocusScope.of(context).unfocus();
-                            if (_formKey.currentState!.validate()) {
-                              final newValue = double.parse(_amountController
-                                  .text
-                                  .replaceAll('\$', '')
-                                  .replaceAll('.', '')
-                                  .replaceAll(',', '.'));
-
-                              final now = DateTime.now().millisecondsSinceEpoch;
-
-                              final newTransaction = TransactionModel(
-                                category: _pdfController.text,
-                                description: _descriptionController.text,
-                                value: _tabController.index == 1
-                                    ? newValue * -1
-                                    : newValue,
-                                date: _newDate != null
-                                    ? _newDate!.millisecondsSinceEpoch
-                                    : now,
-                                createdAt: widget.transaction?.createdAt ?? now,
-                                status: value,
-                                id: widget.transaction?.id,
-                              );
-                              if (widget.transaction == newTransaction) {
-                                Navigator.pop(context);
-                                return;
-                              }
-                              if (widget.transaction != null) {
-                                await _transactionController
-                                    .updateTransaction(newTransaction);
-                                if (mounted) {
-                                  Navigator.of(context).pop(true);
-                                }
-                              } else {
-                                await _transactionController.addTransaction(
-                                  newTransaction,
-                                );
-                                if (mounted) {
-                                  Navigator.of(context).pop(true);
-                                }
-                              }
-                            } else {
-                              log('invalid');
-                            }
+                            _showAnalysisDialog(context);
+                            // if (_formKey.currentState!.validate()) {
+                            //   final newValue = double.parse(_amountController
+                            //       .text
+                            //       .replaceAll('\$', '')
+                            //       .replaceAll('.', '')
+                            //       .replaceAll(',', '.'));
+                            // } else {
+                            //   log('invalid');
+                            // }
                           },
                         ),
                       ),
