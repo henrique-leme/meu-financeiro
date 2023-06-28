@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -65,7 +67,7 @@ class _AnalysisPageState extends State<AnalysisPage>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Análise'),
+          title: const Text('Análise'),
           content: Text(
               'Com base no saldo atual da sua conta fornecido pelo seu extrato, você podera fazer a compra no valor de $valorCompra, parcelando em $parcelasCompra vezes'),
           actions: [
