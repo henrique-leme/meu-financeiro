@@ -5,7 +5,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:meu_financeiro/common/widgets/custm_sendfile_button.dart';
 import 'package:meu_financeiro/models/analysis_model.dart';
-import 'package:meu_financeiro/services/purchase_analysis_service.dart';
+import 'package:meu_financeiro/controllers/purchase_analysis_controller.dart';
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart' as path;
 
@@ -33,6 +33,7 @@ class AnalysisPage extends StatefulWidget {
 class _AnalysisPageState extends State<AnalysisPage>
     with SingleTickerProviderStateMixin, CustomSnackBar {
   final _formKey = GlobalKey<FormState>();
+  final purchaseAnalisysController = locator.get<PurchaseAnalysisController>();
 
   bool value = false;
   String? _selectedFileName;
@@ -69,7 +70,7 @@ class _AnalysisPageState extends State<AnalysisPage>
         return AlertDialog(
           title: const Text('Análise'),
           content: Text(
-              'Com base no saldo atual da sua conta fornecido pelo seu extrato, você podera fazer a compra no valor de $valorCompra, parcelando em $parcelasCompra vezes'),
+              'Com base no saldo atual, você podera fazer a compra no valor de $valorCompra, parcelando em $parcelasCompra vezes'),
           actions: [
             TextButton(
               onPressed: () {
@@ -137,12 +138,6 @@ class _AnalysisPageState extends State<AnalysisPage>
                         readOnly: true,
                         labelText: "Selecione seu Extrato",
                         hintText: "Selecione um arquivo OFX",
-                        validator: (value) {
-                          if (value?.isEmpty ?? true) {
-                            return 'This field cannot be empty.';
-                          }
-                          return null;
-                        },
                         onTap: () async {
                           String? ofxPath = await pickOFXFile();
                           _selectedOfxPath = ofxPath;
@@ -164,8 +159,10 @@ class _AnalysisPageState extends State<AnalysisPage>
                                 .replaceAll('.', '')
                                 .replaceAll(',', '.'));
                             if (_formKey.currentState!.validate()) {
-                              int? parcelasCompra = await lerArquivoOFX(
-                                  _selectedOfxPath, newValue);
+                              int? parcelasCompra =
+                                  await purchaseAnalisysController
+                                      .lerArquivoOFX(
+                                          _selectedOfxPath, newValue);
                               String valorCompra = _amountController.text;
                               _showAnalysisDialog(
                                   context, valorCompra, parcelasCompra);

@@ -1,3 +1,4 @@
+import 'package:meu_financeiro/controllers/purchase_analysis_controller.dart';
 import 'package:meu_financeiro/controllers/transaction_listview_controller.dart';
 import 'package:get_it/get_it.dart';
 
@@ -64,6 +65,10 @@ void setupDependencies() {
       transactionRepository: locator.get<TransactionRepository>(),
     ),
   );
+
+  locator.registerLazySingleton<PurchaseAnalysisController>(() =>
+      PurchaseAnalysisController(
+          transactionRepository: locator.get<TransactionRepository>()));
 
   locator.registerFactory<TransactionController>(
     () => TransactionController(
