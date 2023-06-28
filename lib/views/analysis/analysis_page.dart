@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:meu_financeiro/common/widgets/custm_sendfile_button.dart';
 import 'package:meu_financeiro/models/analysis_model.dart';
+import 'package:meu_financeiro/services/purchase_analysis_service.dart';
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart' as path;
 
@@ -17,9 +20,9 @@ import '../../locator.dart';
 class AnalysisPage extends StatefulWidget {
   final AnalysisModel? analysis;
   const AnalysisPage({
-    super.key,
+    Key? key,
     this.analysis,
-  });
+  }) : super(key: key);
 
   @override
   State<AnalysisPage> createState() => _AnalysisPageState();
@@ -31,6 +34,7 @@ class _AnalysisPageState extends State<AnalysisPage>
 
   bool value = false;
   String? _selectedFileName;
+  String? _selectedOfxPath;
 
   final _descriptionController = TextEditingController();
   final _ofxController = TextEditingController();
@@ -55,26 +59,21 @@ class _AnalysisPageState extends State<AnalysisPage>
     super.dispose();
   }
 
-  Future<void> _showAnalysisDialog(BuildContext context) async {
+  Future<void> _showAnalysisDialog(
+      BuildContext context, String valorCompra, int? parcelasCompra) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Análise'),
-          content: Text('Are you sure you want to analyze the purchase?'),
+          content: Text(
+              'Com base no saldo atual da sua conta fornecido pelo seu extrato, você podera fazer a compra no valor de $valorCompra, parcelando em $parcelasCompra vezes'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Perform analysis here
               },
-              child: Text('Yes'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('No'),
+              child: const Text('Voltar'),
             ),
           ],
         );
@@ -144,6 +143,7 @@ class _AnalysisPageState extends State<AnalysisPage>
                         },
                         onTap: () async {
                           String? ofxPath = await pickOFXFile();
+                          _selectedOfxPath = ofxPath;
                           if (ofxPath != null) {
                             _selectedFileName =
                                 path.basenameWithoutExtension('$ofxPath.ofx');
@@ -157,16 +157,19 @@ class _AnalysisPageState extends State<AnalysisPage>
                         child: PrimaryButton(
                           text: 'Analisar Compra',
                           onPressed: () async {
-                            _showAnalysisDialog(context);
-                            // if (_formKey.currentState!.validate()) {
-                            //   final newValue = double.parse(_amountController
-                            //       .text
-                            //       .replaceAll('\$', '')
-                            //       .replaceAll('.', '')
-                            //       .replaceAll(',', '.'));
-                            // } else {
-                            //   log('invalid');
-                            // }
+                            final newValue = double.parse(_amountController.text
+                                .replaceAll('\$', '')
+                                .replaceAll('.', '')
+                                .replaceAll(',', '.'));
+                            if (_formKey.currentState!.validate()) {
+                              int? parcelasCompra = await lerArquivoOFX(
+                                  _selectedOfxPath, newValue);
+                              String valorCompra = _amountController.text;
+                              _showAnalysisDialog(
+                                  context, valorCompra, parcelasCompra);
+                            } else {
+                              log('invalid');
+                            }
                           },
                         ),
                       ),
